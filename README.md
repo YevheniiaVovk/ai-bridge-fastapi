@@ -2,7 +2,8 @@ AI Bridge 🌉 — A FastAPI-powered AI interface
 This is my project where I connected a modern Python backend with Google Gemini AI. It wasn't just about "making a chat" — it was about building a proper architecture with a database, async requests, and proper data validation.
 
 And yes, I "vibecoded" the frontend part to make it look decent! ✨
-
+### Interface Preview
+![App Screenshot](image_2.png)
 🚀 The Story Behind
 I wanted to build something that feels like a real product. The main challenge was to handle external API limits and make sure the data (prompts and answers) is stored safely. I chose FastAPI for its speed and SQLAlchemy 2.0 because I wanted to practice the latest industry standards.
 
