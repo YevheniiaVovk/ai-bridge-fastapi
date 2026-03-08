@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Bridge</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { margin: 0; background: radial-gradient(circle at 20% 20%, #0e3b3b, #04070c); color: white; min-height: 100vh; }
+        .container { max-width: 1200px; margin: auto; padding: 30px; }
+        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 25px; }
+        textarea { width: 100%; height: 120px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; padding: 15px; margin-bottom: 15px; resize: none; }
+        .btn-send { width: 100%; padding: 12px; background: #238636; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        #chatWindow { height: 300px; overflow-y: auto; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .message { margin-bottom: 15px; padding: 10px; border-radius: 8px; font-size: 14px; }
+        .user { border-left: 4px solid #58a6ff; background: rgba(88, 166, 255, 0.1); }
+        .ai { border-left: 4px solid #2dd4bf; background: rgba(45, 212, 191, 0.1); }
+        .history-item { background: rgba(255,255,255,0.03); padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid">
+            <div class="card">
+                <h2>Запитати Gemini</h2>
+                <textarea id="prompt" placeholder="Напишіть щось..."></textarea>
+                <button class="btn-send" onclick="sendPrompt()">Відправити</button>
+                <div id="chatWindow"></div>
+            </div>
+            <div class="card">
+                <h2>Історія (Ваш IP)</h2>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ТУТ БУЛА ПОМИЛКА. ТЕПЕР URL ВІРНИЙ:
+        const API_URL = "http://localhost:8000/requests";
+
+        function addMessage(text, type) {
+            const chat = document.getElementById("chatWindow");
+            const msg = document.createElement("div");
+            msg.className = `message ${type}`;
+            msg.innerHTML = `<strong>${type === 'user' ? 'ВИ' : 'GEMINI'}:</strong><br>${text}`;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function sendPrompt() {
+            const input = document.getElementById("prompt");
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            input.value = "";
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: text })
+                });
+
+                if (!res.ok) throw new Error(`Помилка сервера: ${res.status}`);
+
+                const data = await res.json();
+                addMessage(data.answer, 'ai');
+                loadHistory();
+            } catch (e) {
+                addMessage("Помилка: Не вдалося зв'язатися з бекендом. Перевірте, чи запущено uvicorn.", 'ai');
+                console.error(e);
+            }
+        }
+
+        async function loadHistory() {
+            const container = document.getElementById("historyList");
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                container.innerHTML = "";
+                data.reverse().forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "history-item";
+                    div.innerText = item.prompt;
+                    container.appendChild(div);
+                });
+            } catch (e) { console.error("History error", e); }
+        }
+        loadHistory();
+    </script>
+</body>
+</html>
