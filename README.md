@@ -27,6 +27,9 @@ Async/Await: Handling AI responses without blocking the rest of the app.
 
 Rate Limiting: Managed how to handle 429 Resource Exhausted errors gracefully.
 
+### Interface Preview
+![App Screenshot](image.png)
+
 ⚙️ Setup & Installation
 I used uv for this project because it's lightning fast. If you don't have it, you should!
 1.  **Clone the repo:**
